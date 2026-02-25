@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Library.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/BooksCategories")]
     [ApiController]
     public class BooksCategoriesController : ControllerBase
     {
