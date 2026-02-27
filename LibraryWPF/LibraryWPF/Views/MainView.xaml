@@ -1,12 +1,357 @@
-﻿<Window x:Class="LibraryWPF.Views.MainView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LibraryWPF.Views"
-        mc:Ignorable="d"
-        Title="MainView" Height="450" Width="800">
+﻿<UserControl x:Class="LibraryWPF.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="clr-namespace:LibraryWPF.ViewModels"
+             MinHeight="600" MinWidth="850"
+             FontFamily="Microsoft Sans Serif"
+             Background="White"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+    
+    <UserControl.DataContext>
+        <vms:MainViewModel/>
+    </UserControl.DataContext>
+    
+    <UserControl.Resources>
+
+        <Style x:Key="NavButton" TargetType="RadioButton">
+            <Setter Property="Height" Value="52"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#B2EBF2"/>
+            <Setter Property="FontFamily" Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="Navigation"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="navBorder"
+                                Background="Transparent"
+                                CornerRadius="0"
+                                Margin="0">
+                            <Grid>
+                                <Rectangle x:Name="activeBar"
+                                           Width="4"
+                                           Fill="White"
+                                           HorizontalAlignment="Left"
+                                           Visibility="Collapsed"/>
+                                <ContentPresenter Margin="20,0,12,0"
+                                                  VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="navBorder" Property="Background" Value="#00838F"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="navBorder" Property="Background" Value="#00838F"/>
+                                <Setter TargetName="activeBar" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LogoutButton" TargetType="Button">
+            <Setter Property="Height" Value="52"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#EF9A9A"/>
+            <Setter Property="FontFamily" Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="logoutBorder"
+                                Background="Transparent"
+                                CornerRadius="0">
+                            <ContentPresenter Margin="20,0,12,0"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="logoutBorder" Property="Background" Value="#1AB71C1C"/>
+                                <Setter Property="Foreground" Value="#EF5350"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="logoutBorder" Property="Background" Value="#C62828"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+    </UserControl.Resources>
+
+    <!-- ═══ ROOT GRID — يمتد بالكامل مع الـ Window ═══ -->
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <!-- Sidebar: عرض ثابت للـ Sidebar -->
+            <ColumnDefinition Width="200"/>
+            <!-- Main Content: يأخذ باقي المساحة -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════════════════════════════════
+             SIDEBAR
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Column="0"
+              Background="#006064">
+
+            <Ellipse Width="180" Height="180"
+                     Fill="#00838F" Opacity="0.25"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Top"
+                     Margin="0,-60,-60,0"/>
+            <Ellipse Width="120" Height="120"
+                     Fill="#004D40" Opacity="0.2"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Bottom"
+                     Margin="-40,0,0,-40"/>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <!-- يأخذ كل المساحة المتبقية ليدفع الـ Bottom للأسفل -->
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Logo -->
+                <StackPanel Grid.Row="0" Margin="20,28,20,22" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Width="34" Height="34"
+                                Background="White" Opacity="0.18"
+                                CornerRadius="8" Margin="0,0,10,0">
+                            <Grid>
+                                <Rectangle Width="16" Height="20"
+                                           Fill="White" Opacity="0.9"
+                                           RadiusX="2" RadiusY="2"
+                                           Margin="2,0,0,0"/>
+                                <Rectangle Width="2" Height="20"
+                                           Fill="#006064" Opacity="0.7"
+                                           HorizontalAlignment="Left"
+                                           Margin="2,0,0,0"/>
+                            </Grid>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Library"
+                                       FontFamily="Microsoft Sans Serif"
+                                       FontSize="15" FontWeight="Bold"
+                                       Foreground="White"/>
+                            <TextBlock Text="Management"
+                                       FontFamily="Microsoft Sans Serif"
+                                       FontSize="9" Foreground="#B2EBF2"
+                                       Margin="0,-1,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Divider -->
+                <Rectangle Grid.Row="1"
+                           Height="1" Fill="White" Opacity="0.12"
+                           Margin="16,0,16,12"/>
+
+                <!-- Nav Items — ScrollViewer يضمن ظهورها عند تصغير الشاشة -->
+                <ScrollViewer Grid.Row="2"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="0,8,0,0">
+
+                        <TextBlock Text="MAIN MENU"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="9.5" FontWeight="Bold"
+                                   Foreground="#80CBC4"
+                                   Margin="22,4,0,10"/>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsCategoriesSelected}"
+                                     Command="{Binding BooksCategoriesCommand}"
+                                     CommandParameter="Categories">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M4,6 L4,20 C4,21.1 4.9,22 6,22 L18,22 C19.1,22 20,21.1 20,20 L20,8 L14,2 L6,2 C4.9,2 4,2.9 4,4 Z M13,9 L13,3.5 L18.5,9 L13,9 Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                                <TextBlock Text="Book Categories" VerticalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsBooksSelected}"
+                                     Command="{Binding BooksCommand}"
+                                     CommandParameter="Books">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M18,2 L6,2 C4.9,2 4,2.9 4,4 L4,20 C4,21.1 4.9,22 6,22 L18,22 C19.1,22 20,21.1 20,20 L20,4 C20,2.9 19.1,2 18,2 Z M9,4 L10.5,4 L10.5,9 L12,7.5 L13.5,9 L13.5,4 L15,4 L9,4 Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                                <TextBlock Text="Manage Books" VerticalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsBorrowSelected}"
+                                     Command="{Binding BorrowBookCommand}"
+                                     CommandParameter="Borrow">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M20,6 L4,6 C2.9,6 2,6.9 2,8 L2,20 C2,21.1 2.9,22 4,22 L20,22 C21.1,22 22,21.1 22,20 L22,8 C22,6.9 21.1,6 20,6 Z M20,20 L4,20 L4,10 L20,10 L20,20 Z M16,1 L8,1 L8,3 L16,3 L16,1 Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                                <TextBlock Text="Borrow Book" VerticalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsReturnSelected}"
+                                     Command="{Binding ReturnBookCommand}"
+                                     CommandParameter="Return">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M20,11 L7.83,11 L13.42,5.41 L12,4 L4,12 L12,20 L13.41,18.59 L7.83,13 L20,13 L20,11 Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                                <TextBlock Text="Return Book" VerticalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <TextBlock Text="ADMINISTRATION"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="9.5" FontWeight="Bold"
+                                   Foreground="#80CBC4"
+                                   Margin="22,16,0,10"/>
+
+                        <RadioButton Style="{StaticResource NavButton}"
+                                     IsChecked="{Binding IsUsersSelected}"
+                                     Command="{Binding UsersCommand}"
+                                     CommandParameter="Users">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M16,11 C17.66,11 18.99,9.66 18.99,8 C18.99,6.34 17.66,5 16,5 C14.34,5 13,6.34 13,8 C13,9.66 14.34,11 16,11 Z M8,11 C9.66,11 10.99,9.66 10.99,8 C10.99,6.34 9.66,5 8,5 C6.34,5 5,6.34 5,8 C5,9.66 6.34,11 8,11 Z M8,13 C5.67,13 1,14.17 1,16.5 L1,18 L15,18 L15,16.5 C15,14.17 10.33,13 8,13 Z M16,13 C15.71,13 15.38,13.02 15.03,13.05 C16.19,13.89 17,15.02 17,16.5 L17,18 L23,18 L23,16.5 C23,14.17 18.33,13 16,13 Z"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
+                                      Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                                <TextBlock Text="Manage Users" VerticalAlignment="Center"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Bottom: User Info + Logout -->
+                <StackPanel Grid.Row="3">
+                    <Rectangle Height="1" Fill="White" Opacity="0.12" Margin="16,0,16,0"/>
+
+                    <Border Background="White" Opacity="0.08"
+                            CornerRadius="10"
+                            Margin="14,12,14,8"
+                            Padding="12,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0"
+                                    Width="34" Height="34"
+                                    CornerRadius="17"
+                                    Background="#00ACC1"
+                                    Margin="0,0,10,0">
+                                <TextBlock Text="{Binding UserInitials}"
+                                           FontFamily="Microsoft Sans Serif"
+                                           FontSize="13" FontWeight="Bold"
+                                           Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding LoggedInUsername}"
+                                           FontFamily="Microsoft Sans Serif"
+                                           FontSize="12" FontWeight="Bold"
+                                           Foreground="White"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding UserRole}"
+                                           FontFamily="Microsoft Sans Serif"
+                                           FontSize="10" Foreground="#80CBC4"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Button Style="{StaticResource LogoutButton}"
+                            Command="{Binding LogoutCommand}"
+                            Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M17,7 L15.59,8.41 L18.17,11 L8,11 L8,13 L18.17,13 L15.58,15.58 L17,17 L22,12 L17,7 Z M4,5 L12,5 L12,3 L4,3 C2.9,3 2,3.9 2,5 L2,19 C2,20.1 2.9,21 4,21 L12,21 L12,19 L4,19 L4,5 Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Sign Out" VerticalAlignment="Center"
+                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════
+             MAIN CONTENT AREA
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Column="1" Background="#F4F6F8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="62"/>
+                <!-- يأخذ كل المساحة المتبقية -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Header Bar -->
+            <Border Grid.Row="0"
+                    Background="White"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="0,0,0,1">
+                <Grid Margin="24,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentPageTitle}"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="16" FontWeight="Bold"
+                                   Foreground="#006064"/>
+                        <TextBlock Text="{Binding CurrentPageSubtitle}"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="11" Foreground="#90A4AE"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TodayDate}"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="11.5" Foreground="#78909C"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,18,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Dynamic Content Region — يمتد بالكامل -->
+            <Grid Grid.Row="1" Margin="20,16,20,16">
+
+                <ContentControl x:Name="Pages"
+                Content="{Binding CurrentViewModel}" />
+
+            </Grid>
+        </Grid>
     </Grid>
-</Window>
+</UserControl>

@@ -4,27 +4,20 @@ namespace LibraryWPF.Commands
 {
     public class Command : ICommand
     {
-        event EventHandler? ICommand.CanExecuteChanged
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
+        private readonly Action<object> _execute;
+        private readonly Func<object, bool> _canExecute;
 
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        bool ICommand.CanExecute(object? parameter)
+        public event EventHandler CanExecuteChanged
         {
-            throw new NotImplementedException();
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
         }
-
-        void ICommand.Execute(object? parameter)
+        public Command(Action<object> execute, Func<object, bool> canExecute = null)
         {
-            throw new NotImplementedException();
+            _execute = execute;
+            _canExecute = canExecute;
         }
+        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
+        public void Execute(object parameter) => _execute(parameter);
     }
 }

@@ -1,0 +1,793 @@
+﻿<UserControl x:Class="LibraryWPF.Views.BooksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Microsoft Sans Serif"
+             Background="Transparent"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch">
+
+    <UserControl.Resources>
+
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- ── ComboBox Style ── -->
+        <Style x:Key="FilterCombo" TargetType="ComboBox">
+            <Setter Property="Height"          Value="36"/>
+            <Setter Property="FontFamily"      Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize"        Value="12"/>
+            <Setter Property="Foreground"      Value="#37474F"/>
+            <Setter Property="Background"      Value="White"/>
+            <Setter Property="BorderBrush"     Value="#CFD8DC"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Padding"         Value="10,0,4,0"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="28"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="Center"
+                                                  IsHitTestVisible="False"/>
+                                <Path Grid.Column="1"
+                                      Data="M7,10 L12,15 L17,10 Z"
+                                      Fill="#90A4AE" Width="10" Height="6"
+                                      Stretch="Uniform" HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" IsHitTestVisible="False"/>
+                                <ToggleButton Grid.Column="0" Grid.ColumnSpan="2"
+                                              IsChecked="{Binding IsDropDownOpen,
+                                              RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                              Background="Transparent" BorderThickness="0"
+                                              Focusable="False"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#006064"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#006064"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="FontFamily"  Value="Microsoft Sans Serif"/>
+                        <Setter Property="FontSize"    Value="12"/>
+                        <Setter Property="Foreground"  Value="#37474F"/>
+                        <Setter Property="Padding"     Value="12,8"/>
+                        <Setter Property="Cursor"      Value="Hand"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0F7FA"/>
+                                <Setter Property="Foreground" Value="#006064"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#B2EBF2"/>
+                                <Setter Property="Foreground" Value="#006064"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Search TextBox ── -->
+        <Style x:Key="SearchBox" TargetType="TextBox">
+            <Setter Property="Height"          Value="36"/>
+            <Setter Property="FontFamily"      Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize"        Value="12"/>
+            <Setter Property="Foreground"      Value="#37474F"/>
+            <Setter Property="Background"      Value="White"/>
+            <Setter Property="BorderBrush"     Value="#CFD8DC"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="Padding"         Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#006064"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Primary Button ── -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height"          Value="36"/>
+            <Setter Property="Background"      Value="#006064"/>
+            <Setter Property="Foreground"      Value="White"/>
+            <Setter Property="FontFamily"      Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize"        Value="12"/>
+            <Setter Property="FontWeight"      Value="Bold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8" Padding="18,0">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#00838F"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#004D40"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Context Action Button ── -->
+        <Style x:Key="ContextActionButton" TargetType="Button">
+            <Setter Property="Height"          Value="34"/>
+            <Setter Property="MinWidth"        Value="120"/>
+            <Setter Property="Background"      Value="White"/>
+            <Setter Property="Foreground"      Value="#37474F"/>
+            <Setter Property="FontFamily"      Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize"        Value="11.5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="12,0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#E0F7FA"/>
+                                <Setter Property="Foreground" Value="#006064"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#B2EBF2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── DataGrid Column Header ── -->
+        <Style x:Key="DGColumnHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="Background"      Value="#006064"/>
+            <Setter Property="Foreground"      Value="White"/>
+            <Setter Property="FontFamily"      Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize"        Value="11.5"/>
+            <Setter Property="FontWeight"      Value="Bold"/>
+            <Setter Property="Height"          Value="42"/>
+            <Setter Property="Padding"         Value="12,0"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="BorderBrush"     Value="#00838F"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridColumnHeader">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── DataGrid Row ── -->
+        <Style x:Key="DGRow" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontFamily" Value="Microsoft Sans Serif"/>
+            <Setter Property="FontSize"   Value="11.5"/>
+            <Setter Property="Foreground" Value="#37474F"/>
+            <Setter Property="Height"     Value="44"/>
+            <Setter Property="Cursor"     Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E0F7FA"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#B2EBF2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ── DataGrid Cell ── -->
+        <Style x:Key="DGCell" TargetType="DataGridCell">
+            <Setter Property="BorderThickness"  Value="0"/>
+            <Setter Property="Padding"          Value="12,0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#006064"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ── Close Button ── -->
+        <Style x:Key="CloseButton" TargetType="Button">
+            <Setter Property="Width"           Value="28"/>
+            <Setter Property="Height"          Value="28"/>
+            <Setter Property="Background"      Value="Transparent"/>
+            <Setter Property="Foreground"      Value="#90A4AE"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="FontWeight"      Value="Bold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#FFEBEE"/>
+                                <Setter Property="Foreground" Value="#EF5350"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Stats -->
+            <RowDefinition Height="Auto"/>
+            <!-- Toolbar / Search -->
+            <RowDefinition Height="Auto"/>
+            <!-- DataGrid -->
+            <RowDefinition Height="*"/>
+            <!-- Action Panel -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ════════════════════════════════
+             ROW 0 — Stats Cards
+             ════════════════════════════════ -->
+        <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,14">
+
+            <!-- Total Books -->
+            <Border Background="White" CornerRadius="12"
+                    Margin="0,0,10,0" Padding="16,12">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.07" Color="Black"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Total Books" FontSize="10.5" Foreground="#90A4AE"/>
+                        <TextBlock Text="{Binding TotalBooks}"
+                                   FontSize="24" FontWeight="Bold"
+                                   Foreground="#006064" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="40" Height="40"
+                            CornerRadius="10" Background="#E0F7FA">
+                        <Path Data="M18,2 L6,2 C4.9,2 4,2.9 4,4 L4,20 C4,21.1 4.9,22 6,22 L18,22 C19.1,22 20,21.1 20,20 L20,4 C20,2.9 19.1,2 18,2 Z"
+                              Fill="#006064" Width="18" Height="18" Stretch="Uniform"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Total Copies -->
+            <Border Background="White" CornerRadius="12"
+                    Margin="5,0,5,0" Padding="16,12">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.07" Color="Black"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Total Copies" FontSize="10.5" Foreground="#90A4AE"/>
+                        <TextBlock Text="{Binding TotalCopies}"
+                                   FontSize="24" FontWeight="Bold"
+                                   Foreground="#00838F" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="40" Height="40"
+                            CornerRadius="10" Background="#E0F7FA">
+                        <Path Data="M4,6 L4,20 C4,21.1 4.9,22 6,22 L18,22 C19.1,22 20,21.1 20,20 L20,8 L14,2 L6,2 C4.9,2 4,2.9 4,4 Z M13,9 L13,3.5 L18.5,9 L13,9 Z"
+                              Fill="#00838F" Width="18" Height="18" Stretch="Uniform"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Available Copies -->
+            <Border Background="White" CornerRadius="12"
+                    Margin="10,0,0,0" Padding="16,12">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.07" Color="Black"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Available Copies" FontSize="10.5" Foreground="#90A4AE"/>
+                        <TextBlock Text="{Binding AvailableCopies}"
+                                   FontSize="24" FontWeight="Bold"
+                                   Foreground="#00ACC1" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Border Grid.Column="1" Width="40" Height="40"
+                            CornerRadius="10" Background="#E0F7FA">
+                        <Path Data="M9,16.17 L4.83,12 L3.41,13.41 L9,19 L21,7 L19.59,5.59 Z"
+                              Fill="#00ACC1" Width="18" Height="18" Stretch="Uniform"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+        </UniformGrid>
+
+        <!-- ════════════════════════════════
+             ROW 1 — Toolbar / Search
+             ════════════════════════════════ -->
+        <Border Grid.Row="1"
+                Background="White" CornerRadius="12"
+                Padding="16,12" Margin="0,0,0,12">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.07" Color="Black"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!-- Search Type Label -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Search Type ComboBox -->
+                    <ColumnDefinition Width="150"/>
+                    <!-- Dynamic Input (TextBox or ComboBox) -->
+                    <ColumnDefinition Width="200"/>
+                    <!-- Search Button -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Clear Button -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Spacer -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Add Book Button -->
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Label -->
+                <TextBlock Grid.Column="0"
+                           Text="Search by:"
+                           FontFamily="Microsoft Sans Serif"
+                           FontSize="12" Foreground="#78909C"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+
+                <!-- Search Type Selector -->
+                <ComboBox Grid.Column="1"
+                          Style="{StaticResource FilterCombo}"
+                          ItemsSource="{Binding SearchTypeOptions}"
+                          SelectedItem="{Binding SelectedSearchType}"
+                          Margin="0,0,8,0"/>
+
+                <!-- ── Dynamic Input Panel ──
+                     3 inputs stacked; only one visible at a time
+                     driven by SelectedSearchType in ViewModel        -->
+                <Grid Grid.Column="2" Margin="0,0,8,0">
+
+                    <!-- TEXT INPUT: for Title / SubTitle / ISBN -->
+                    <TextBox Style="{StaticResource SearchBox}"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding IsTextSearchVisible, Converter={StaticResource BoolToVis}}"/>
+
+                    <!-- COMBOBOX: Category -->
+                    <ComboBox Style="{StaticResource FilterCombo}"
+                              ItemsSource="{Binding Categories}"
+                              DisplayMemberPath="CategoryName"
+                              SelectedItem="{Binding SelectedCategoryFilter}"
+                              Visibility="{Binding IsCategorySearchVisible, Converter={StaticResource BoolToVis}}"/>
+
+                    <!-- COMBOBOX: Author -->
+                    <ComboBox Style="{StaticResource FilterCombo}"
+                              ItemsSource="{Binding Authors}"
+                              DisplayMemberPath="AuthorName"
+                              SelectedItem="{Binding SelectedAuthorFilter}"
+                              Visibility="{Binding IsAuthorSearchVisible, Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+
+                <!-- Search Button -->
+                <Button Grid.Column="3"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding SearchCommand}"
+                        Margin="0,0,6,0">
+                    <StackPanel Orientation="Horizontal" Margin="14,0">
+                        <Path Data="M15.5,14 L14.71,14 L14.43,13.73 C15.41,12.59 16,11.11 16,9.5 C16,5.91 13.09,3 9.5,3 C5.91,3 3,5.91 3,9.5 C3,13.09 5.91,16 9.5,16 C11.11,16 12.59,15.41 13.73,14.43 L14,14.71 L14,15.5 L19,20.49 L20.49,19 L15.5,14 Z M9.5,14 C7.01,14 5,11.99 5,9.5 C5,7.01 7.01,5 9.5,5 C11.99,5 14,7.01 14,9.5 C14,11.99 11.99,14 9.5,14 Z"
+                              Fill="White" Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"/>
+                        <TextBlock Text="Search" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Clear Button -->
+                <Button Grid.Column="4"
+                        Height="36" Background="#F4F6F8"
+                        Foreground="#78909C"
+                        FontFamily="Microsoft Sans Serif"
+                        FontSize="12" BorderThickness="0"
+                        Cursor="Hand"
+                        Command="{Binding ClearSearchCommand}"
+                        Margin="0,0,0,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                    CornerRadius="8" Padding="14,0">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bg" Property="Background" Value="#E0E0E0"/>
+                                    <Setter Property="Foreground" Value="#37474F"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="Clear" VerticalAlignment="Center"/>
+                </Button>
+
+                <!-- Add Book -->
+                <Button Grid.Column="6"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding AddBookCommand}">
+                    <StackPanel Orientation="Horizontal" Margin="16,0">
+                        <Path Data="M19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 L11,5 L13,5 L13,11 L19,11 L19,13 Z"
+                              Fill="White" Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0"/>
+                        <TextBlock Text="Add Book" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+            </Grid>
+        </Border>
+
+        <!-- ════════════════════════════════
+             ROW 2 — DataGrid
+             ════════════════════════════════ -->
+        <Border Grid.Row="2"
+                Background="White" CornerRadius="12"
+                ClipToBounds="True">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.07" Color="Black"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Table Header Bar -->
+                <Border Grid.Row="0"
+                        Background="#006064"
+                        CornerRadius="12,12,0,0"
+                        Padding="18,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="Books"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="13" FontWeight="Bold"
+                                   Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding FilteredCount, StringFormat='{}{0} records'}"
+                                   FontFamily="Microsoft Sans Serif"
+                                   FontSize="11" Foreground="#B2EBF2"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding FilteredBooks}"
+                          SelectedItem="{Binding SelectedBook}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="False"
+                          CanUserResizeRows="False"
+                          IsReadOnly="True"
+                          SelectionMode="Single"
+                          SelectionUnit="FullRow"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#F0F0F0"
+                          BorderThickness="0"
+                          Background="White"
+                          RowBackground="White"
+                          AlternatingRowBackground="#FAFFFE"
+                          ColumnHeaderStyle="{StaticResource DGColumnHeader}"
+                          RowStyle="{StaticResource DGRow}"
+                          CellStyle="{StaticResource DGCell}"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          FontFamily="Microsoft Sans Serif">
+
+                    <DataGrid.Columns>
+
+                        <!-- ID -->
+                        <DataGridTextColumn Header=" ID"
+                                            Binding="{Binding BookId}"
+                                            Width="55" FontSize="11.5"/>
+
+                        <!-- Title -->
+                        <DataGridTextColumn Header="Title"
+                                            Binding="{Binding Title}"
+                                            Width="150" FontSize="11.5"/>
+
+                        <!-- SubTitle -->
+                        <DataGridTextColumn Header="Subtitle"
+                                            Binding="{Binding SubTitle}"
+                                            Width="130" FontSize="11.5"/>
+
+                        <!-- Author -->
+                        <DataGridTextColumn Header="Author"
+                                            Binding="{Binding AuthorName}"
+                                            Width="120" FontSize="11.5"/>
+
+                        <!-- ISBN -->
+                        <DataGridTextColumn Header="ISBN"
+                                            Binding="{Binding ISBN}"
+                                            Width="115" FontSize="11.5"/>
+
+                        <!-- Category -->
+                        <DataGridTextColumn Header="Category"
+                                            Binding="{Binding CategoryName}"
+                                            Width="110" FontSize="11.5"/>
+
+                        <!-- Total Copies Badge -->
+                        <DataGridTemplateColumn Header="Copies" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="#E0F7FA" CornerRadius="10"
+                                            Padding="8,3" HorizontalAlignment="Center"
+                                            Margin="4,0">
+                                        <TextBlock Text="{Binding TotalCopies}"
+                                                   FontFamily="Microsoft Sans Serif"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   Foreground="#006064"
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Available Copies Badge -->
+                        <DataGridTemplateColumn Header="Available" Width="88">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="10" Padding="8,3"
+                                            HorizontalAlignment="Center" Margin="4,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E8F5E9"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding AvailableCopies}" Value="0">
+                                                        <Setter Property="Background" Value="#FFEBEE"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding AvailableCopies}"
+                                                   FontFamily="Microsoft Sans Serif"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#2E7D32"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding AvailableCopies}" Value="0">
+                                                            <Setter Property="Foreground" Value="#C62828"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Options -->
+                        <DataGridTemplateColumn Header="Actions" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Background="Transparent" BorderThickness="0"
+                                            Cursor="Hand" Focusable="False"
+                                            Command="{Binding DataContext.SelectBookCommand,
+                                                      RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="bg" Background="Transparent"
+                                                        CornerRadius="6" Padding="8,4"
+                                                        HorizontalAlignment="Left" Margin="10,0">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Path Data="M12,8 C10.9,8 10,8.9 10,10 C10,11.1 10.9,12 12,12 C13.1,12 14,11.1 14,10 C14,8.9 13.1,8 12,8 Z M12,14 C10.9,14 10,14.9 10,16 C10,17.1 10.9,18 12,18 C13.1,18 14,17.1 14,16 C14,14.9 13.1,14 12,14 Z M12,2 C10.9,2 10,2.9 10,4 C10,5.1 10.9,6 12,6 C13.1,6 14,5.1 14,4 C14,2.9 13.1,2 12,2 Z"
+                                                              Fill="#90A4AE" Width="14" Height="14"
+                                                              Stretch="Uniform" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="Options"
+                                                                   FontFamily="Microsoft Sans Serif"
+                                                                   FontSize="11.5" Foreground="#90A4AE"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="bg" Property="Background" Value="#E0F7FA"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- ════════════════════════════════
+             ROW 3 — Action Panel
+             ════════════════════════════════ -->
+        <Border Grid.Row="3"
+                Visibility="{Binding IsActionPanelVisible, Converter={StaticResource BoolToVis}}"
+                Background="White" CornerRadius="12"
+                Margin="0,12,0,0">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.10" Color="Black"/>
+            </Border.Effect>
+
+            <Grid Margin="18,12">
+                <Grid.ColumnDefinitions>
+                    <!-- Book Title Badge -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Divider -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- View Details -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Edit -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Borrow Copy -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Add Book -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Spacer -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Close -->
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Selected Book Badge -->
+                <Border Grid.Column="0"
+                        Background="#006064" CornerRadius="6"
+                        Padding="12,6" Margin="0,0,14,0"
+                        MaxWidth="200">
+                    <TextBlock Text="{Binding SelectedBook.Title}"
+                               FontFamily="Microsoft Sans Serif"
+                               FontSize="12" FontWeight="Bold"
+                               Foreground="White" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                </Border>
+
+                <!-- Divider -->
+                <Rectangle Grid.Column="1"
+                           Width="1" Fill="#E0E0E0" Margin="0,4,14,4"/>
+
+                <!-- ① View Details -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource ContextActionButton}"
+                        Command="{Binding ViewBookDetailsCommand}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M12,4.5 C7,4.5 2.73,7.61 1,12 C2.73,16.39 7,19.5 12,19.5 C17,19.5 21.27,16.39 23,12 C21.27,7.61 17,4.5 12,4.5 Z M12,17 C9.24,17 7,14.76 7,12 C7,9.24 9.24,7 12,7 C14.76,7 17,9.24 17,12 C17,14.76 14.76,17 12,17 Z M12,9 C10.34,9 9,10.34 9,12 C9,13.66 10.34,15 12,15 C13.66,15 15,13.66 15,12 C15,10.34 13.66,9 12,9 Z"
+                              Fill="#006064" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="View Details" VerticalAlignment="Center"
+                                   FontFamily="Microsoft Sans Serif"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- ② Edit Details -->
+                <Button Grid.Column="3"
+                        Style="{StaticResource ContextActionButton}"
+                        Command="{Binding EditBookCommand}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M3,17.25 L3,21 L6.75,21 L17.81,9.94 L14.06,6.19 L3,17.25 Z M20.71,7.04 C21.1,6.65 21.1,6.02 20.71,5.63 L18.37,3.29 C17.98,2.9 17.35,2.9 16.96,3.29 L15.13,5.12 L18.88,8.87 L20.71,7.04 Z"
+                              Fill="#00838F" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="Edit Details" VerticalAlignment="Center"
+                                   FontFamily="Microsoft Sans Serif"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- ③ Borrow Copy -->
+                <Button Grid.Column="4"
+                        Style="{StaticResource ContextActionButton}"
+                        Command="{Binding BorrowCopyCommand}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M20,6 L4,6 C2.9,6 2,6.9 2,8 L2,20 C2,21.1 2.9,22 4,22 L20,22 C21.1,22 22,21.1 22,20 L22,8 C22,6.9 21.1,6 20,6 Z M20,20 L4,20 L4,10 L20,10 L20,20 Z M16,1 L8,1 L8,3 L16,3 L16,1 Z"
+                              Fill="#00ACC1" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="Borrow Copy" VerticalAlignment="Center"
+                                   FontFamily="Microsoft Sans Serif"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- ④ Add Copy -->
+                <Button Grid.Column="5"
+                        Style="{StaticResource ContextActionButton}"
+                        Command="{Binding AddCopyCommand}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Path Data="M19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 L11,5 L13,5 L13,11 L19,11 L19,13 Z"
+                              Fill="#006064" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"/>
+                        <TextBlock Text="Add Copy" VerticalAlignment="Center"
+                                   FontFamily="Microsoft Sans Serif"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Close -->
+                <Button Grid.Column="7"
+                        Style="{StaticResource CloseButton}"
+                        Command="{Binding CloseActionPanelCommand}"
+                        Content="✕"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</UserControl>
